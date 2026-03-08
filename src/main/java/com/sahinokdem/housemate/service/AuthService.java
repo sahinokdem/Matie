@@ -61,7 +61,7 @@ public class AuthService {
                 .build();
     }
 
-    @Transactional(readOnly = true)
+    @Transactional
     public AuthResponse login(LoginRequest request) {
         // Authenticate user
         Authentication authentication = authenticationManager.authenticate(
@@ -74,6 +74,15 @@ public class AuthService {
         // Get authenticated user
         UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
         User user = userDetails.getUser();
+
+        // If user was soft deleted, reactivate the account
+        if (user.getStatus() == UserStatus.DELETED) {
+            user.setStatus(UserStatus.ACTIVE);
+            user.setDeletedAt(null);
+            user.setDeletedBy(null);
+            user.setDeletionReason(null);
+            user = userRepository.save(user);
+        }
 
         // Generate JWT token
         String jwtToken = jwtService.generateToken(userDetails);

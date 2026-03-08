@@ -2,7 +2,7 @@ spring:
   application:
     name: roommate
   datasource:
-    url: jdbc:postgresql://localhost:5432/roommate
+    url: jdbc:postgresql://localhost:5433/roommate
     username: postgres
     password: postgres
   jpa:

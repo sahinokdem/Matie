@@ -12,16 +12,16 @@ import org.springframework.context.annotation.Configuration;
 @OpenAPIDefinition(
         info = @Info(
                 title = "Housemate API",
-                description = "Housemate (Oda/Ev Arkadaşı Bulma) MVP Backend API Dokümantasyonu",
+                description = "Housemate (Roommate & Housing Listing Platform) MVP Backend API Documentation",
                 version = "1.0"
         ),
         security = {
-                @SecurityRequirement(name = "bearerAuth") // Tüm endpointlerde bu güvenliği zorunlu tut (public olanlar hariç)
+                @SecurityRequirement(name = "Bearer Authentication")
         }
 )
 @SecurityScheme(
-        name = "bearerAuth",
-        description = "Giriş yaptıktan sonra aldığınız JWT token'ı buraya yapıştırın.",
+        name = "Bearer Authentication",
+        description = "JWT authentication token. Please enter your JWT token obtained from login.",
         scheme = "bearer",
         type = SecuritySchemeType.HTTP,
         bearerFormat = "JWT",

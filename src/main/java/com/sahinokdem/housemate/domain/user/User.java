@@ -75,6 +75,10 @@ public class User extends BaseEntity {
         return status == UserStatus.ACTIVE;
     }
 
+    public boolean isBanned() {
+        return status == UserStatus.BANNED;
+    }
+
     public String getFullName() {
         return firstName + " " + lastName;
     }

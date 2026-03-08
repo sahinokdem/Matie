@@ -39,7 +39,9 @@ public class UserDetailsImpl implements UserDetails {
 
     @Override
     public boolean isAccountNonLocked() {
-        return user.getStatus() == UserStatus.ACTIVE;
+        // Hesap sadece admin tarafından BANLANMIŞSA kilitlidir.
+        // ACTIVE ve DELETED olanlar bu kapıdan geçebilir.
+        return user.getStatus() != UserStatus.BANNED;
     }
 
     @Override
@@ -49,6 +51,6 @@ public class UserDetailsImpl implements UserDetails {
 
     @Override
     public boolean isEnabled() {
-        return user.getStatus() == UserStatus.ACTIVE;
+        return user.getStatus() != UserStatus.BANNED;
     }
 }
