@@ -1,0 +1,2 @@
+After mvp, UserRole must be embedded to claims. Because rn, JWT goes db
+PhotoStorageService will be for Cloud storage

@@ -13,6 +13,9 @@ import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
+
 @Entity
 @Table(name = "listings")
 @Getter
@@ -27,6 +30,7 @@ public class Listing extends BaseEntity {
     private User owner;
 
     @Enumerated(EnumType.STRING)
+    @JdbcTypeCode(SqlTypes.NAMED_ENUM)
     @Column(name = "listing_type", nullable = false)
     private ListingType listingType;
 
@@ -84,6 +88,7 @@ public class Listing extends BaseEntity {
     private Boolean smokingAllowed = false;
 
     @Enumerated(EnumType.STRING)
+    @JdbcTypeCode(SqlTypes.NAMED_ENUM)
     @Column(name = "status", nullable = false)
     @Builder.Default
     private ListingStatus status = ListingStatus.ACTIVE;

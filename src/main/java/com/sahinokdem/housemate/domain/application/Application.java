@@ -8,6 +8,9 @@ import lombok.*;
 
 import java.time.LocalDate;
 
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
+
 @Entity
 @Table(
     name = "applications",
@@ -29,6 +32,7 @@ public class Application extends BaseEntity {
     private User applicant;
 
     @Enumerated(EnumType.STRING)
+    @JdbcTypeCode(SqlTypes.NAMED_ENUM)
     @Column(name = "status", nullable = false)
     @Builder.Default
     private ApplicationStatus status = ApplicationStatus.PENDING;
