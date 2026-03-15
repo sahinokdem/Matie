@@ -1,6 +1,8 @@
 package com.sahinokdem.housemate.controller;
 
+import com.sahinokdem.housemate.dto.listing.AddListingPhotoRequest;
 import com.sahinokdem.housemate.dto.listing.ListingCreateRequest;
+import com.sahinokdem.housemate.dto.listing.ListingPhotoResponse;
 import com.sahinokdem.housemate.dto.listing.ListingResponse;
 import com.sahinokdem.housemate.dto.listing.ListingUpdateRequest;
 import com.sahinokdem.housemate.security.UserDetailsImpl;
@@ -185,6 +187,54 @@ public class ListingController {
             @PathVariable UUID id
     ) {
         listingService.softDeleteListing(userDetails.getUser().getId(), id);
+        return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("/{id}/photos")
+    @Operation(
+            summary = "Add photo to listing",
+            description = "Adds a single photo URL to an existing listing. Only the owner can add photos."
+    )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "201", description = "Photo added successfully", content = @Content(schema = @Schema(implementation = ListingPhotoResponse.class))),
+            @ApiResponse(responseCode = "400", description = "Invalid request", content = @Content),
+            @ApiResponse(responseCode = "401", description = "User not authenticated", content = @Content),
+            @ApiResponse(responseCode = "403", description = "User not authorized to update this listing", content = @Content),
+            @ApiResponse(responseCode = "404", description = "Listing not found", content = @Content)
+    })
+    public ResponseEntity<ListingPhotoResponse> addPhotoToListing(
+            @AuthenticationPrincipal UserDetailsImpl userDetails,
+            @Parameter(description = "Listing ID", required = true)
+            @PathVariable UUID id,
+            @Valid @RequestBody AddListingPhotoRequest request
+    ) {
+        ListingPhotoResponse response = listingService.addPhotoToListing(
+                userDetails.getUser().getId(),
+                id,
+                request.getPhotoUrl()
+        );
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    }
+
+    @DeleteMapping("/{id}/photos/{photoId}")
+    @Operation(
+            summary = "Remove photo from listing",
+            description = "Removes a single photo from an existing listing. Only the owner can remove photos."
+    )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "204", description = "Photo removed successfully", content = @Content),
+            @ApiResponse(responseCode = "401", description = "User not authenticated", content = @Content),
+            @ApiResponse(responseCode = "403", description = "User not authorized to update this listing", content = @Content),
+            @ApiResponse(responseCode = "404", description = "Listing or photo not found", content = @Content)
+    })
+    public ResponseEntity<Void> removePhotoFromListing(
+            @AuthenticationPrincipal UserDetailsImpl userDetails,
+            @Parameter(description = "Listing ID", required = true)
+            @PathVariable UUID id,
+            @Parameter(description = "Photo ID", required = true)
+            @PathVariable UUID photoId
+    ) {
+        listingService.removePhotoFromListing(userDetails.getUser().getId(), id, photoId);
         return ResponseEntity.noContent().build();
     }
 }

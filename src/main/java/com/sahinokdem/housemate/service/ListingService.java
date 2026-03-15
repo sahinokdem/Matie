@@ -9,6 +9,7 @@ import com.sahinokdem.housemate.exception.ForbiddenException;
 import com.sahinokdem.housemate.exception.ResourceNotFoundException;
 import com.sahinokdem.housemate.repository.ListingRepository;
 import com.sahinokdem.housemate.repository.UserRepository;
+import com.sahinokdem.housemate.service.storage.PhotoStorageService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -26,6 +27,7 @@ public class ListingService {
 
     private final ListingRepository listingRepository;
     private final UserRepository userRepository;
+    private final PhotoStorageService photoStorageService;
 
     @Transactional
     public ListingResponse createListing(UUID currentUserId, ListingCreateRequest request) {
@@ -155,6 +157,55 @@ public class ListingService {
         listingRepository.save(listing);
     }
 
+    @Transactional
+    public ListingPhotoResponse addPhotoToListing(UUID currentUserId, UUID listingId, String photoUrl) {
+        Listing listing = listingRepository.findByIdAndStatusAndDeletedAtIsNull(listingId, ListingStatus.ACTIVE)
+                .orElseThrow(() -> new ResourceNotFoundException("Listing not found with id: " + listingId));
+
+        if (!listing.getOwner().getId().equals(currentUserId)) {
+            throw new ForbiddenException("You are not authorized to update photos for this listing");
+        }
+
+        ListingPhoto photo = ListingPhoto.builder()
+                .photoUrl(photoUrl)
+                .displayOrder(listing.getPhotos().size())
+                .build();
+
+        listing.addPhoto(photo);
+        Listing savedListing = listingRepository.save(listing);
+
+        ListingPhoto savedPhoto = savedListing.getPhotos().stream()
+                .filter(item -> photoUrl.equals(item.getPhotoUrl()) && item.getDisplayOrder().equals(photo.getDisplayOrder()))
+                .reduce((first, second) -> second)
+                .orElse(photo);
+
+        return mapPhotoResponse(savedPhoto);
+    }
+
+    @Transactional
+    public void removePhotoFromListing(UUID currentUserId, UUID listingId, UUID photoId) {
+        Listing listing = listingRepository.findByIdAndStatusAndDeletedAtIsNull(listingId, ListingStatus.ACTIVE)
+                .orElseThrow(() -> new ResourceNotFoundException("Listing not found with id: " + listingId));
+
+        if (!listing.getOwner().getId().equals(currentUserId)) {
+            throw new ForbiddenException("You are not authorized to update photos for this listing");
+        }
+
+        ListingPhoto photo = listing.getPhotos().stream()
+                .filter(item -> item.getId().equals(photoId))
+                .findFirst()
+                .orElseThrow(() -> new ResourceNotFoundException("Photo not found with id: " + photoId));
+
+        String fileUrl = photo.getPhotoUrl();
+        listing.removePhoto(photo);
+        listingRepository.save(listing);
+
+        try {
+            photoStorageService.deletePhoto(fileUrl);
+        } catch (RuntimeException ignored) {
+        }
+    }
+
     private ListingResponse mapToResponse(Listing listing) {
         ListingOwnerResponse ownerResponse = ListingOwnerResponse.builder()
                 .id(listing.getOwner().getId())
@@ -164,11 +215,7 @@ public class ListingService {
                 .build();
 
         List<ListingPhotoResponse> photoResponses = listing.getPhotos().stream()
-                .map(photo -> ListingPhotoResponse.builder()
-                        .id(photo.getId())
-                        .photoUrl(photo.getPhotoUrl())
-                        .displayOrder(photo.getDisplayOrder())
-                        .build())
+            .map(this::mapPhotoResponse)
                 .collect(Collectors.toList());
 
         return ListingResponse.builder()
@@ -193,6 +240,14 @@ public class ListingService {
                 .updatedAt(listing.getUpdatedAt())
                 .owner(ownerResponse)
                 .photos(photoResponses)
+                .build();
+    }
+
+    private ListingPhotoResponse mapPhotoResponse(ListingPhoto photo) {
+        return ListingPhotoResponse.builder()
+                .id(photo.getId())
+                .photoUrl(photo.getPhotoUrl())
+                .displayOrder(photo.getDisplayOrder())
                 .build();
     }
 }
