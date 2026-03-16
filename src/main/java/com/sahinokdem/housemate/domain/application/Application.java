@@ -6,8 +6,6 @@ import com.sahinokdem.housemate.domain.user.User;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.time.LocalDate;
-
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
 
@@ -39,28 +37,4 @@ public class Application extends BaseEntity {
 
     @Column(name = "message", columnDefinition = "TEXT")
     private String message;
-
-    @Column(name = "move_in_date")
-    private LocalDate moveInDate;
-
-    // Helper methods
-    public boolean isPending() {
-        return status == ApplicationStatus.PENDING;
-    }
-
-    public boolean isAccepted() {
-        return status == ApplicationStatus.ACCEPTED;
-    }
-
-    public boolean isRejected() {
-        return status == ApplicationStatus.REJECTED;
-    }
-
-    public void accept() {
-        this.status = ApplicationStatus.ACCEPTED;
-    }
-
-    public void reject() {
-        this.status = ApplicationStatus.REJECTED;
-    }
 }
