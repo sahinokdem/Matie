@@ -142,7 +142,8 @@ public class ListingController {
                         @RequestParam(defaultValue = "ALL") String type,
             @PageableDefault(size = 20, sort = "createdAt") Pageable pageable
     ) {
-                Page<ListingResponse> response = listingService.getAllListings(city, type, pageable);
+                String normalizedType = "ALL".equalsIgnoreCase(type) ? null : type;
+                Page<ListingResponse> response = listingService.getAllListings(city, normalizedType, pageable);
         return ResponseEntity.ok(response);
     }
 
