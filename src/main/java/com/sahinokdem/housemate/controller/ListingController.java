@@ -4,6 +4,8 @@ import com.sahinokdem.housemate.dto.listing.AddListingPhotoRequest;
 import com.sahinokdem.housemate.dto.listing.ListingCreateRequest;
 import com.sahinokdem.housemate.dto.listing.ListingPhotoResponse;
 import com.sahinokdem.housemate.dto.listing.ListingResponse;
+import com.sahinokdem.housemate.dto.listing.RoommateWantedCreateRequest;
+import com.sahinokdem.housemate.dto.listing.RoommateWantedUpdateRequest;
 import com.sahinokdem.housemate.dto.listing.ListingUpdateRequest;
 import com.sahinokdem.housemate.security.UserDetailsImpl;
 import com.sahinokdem.housemate.service.ListingService;
@@ -36,10 +38,10 @@ public class ListingController {
 
     private final ListingService listingService;
 
-    @PostMapping
+    @PostMapping("/room-available")
     @Operation(
-            summary = "Create a new listing",
-            description = "Creates a new room or roommate listing. The authenticated user becomes the owner of the listing."
+            summary = "Create ROOM_AVAILABLE listing",
+            description = "Creates a room-available listing for users who are offering a room."
     )
     @ApiResponses(value = {
             @ApiResponse(
@@ -58,11 +60,41 @@ public class ListingController {
                     content = @Content
             )
     })
-    public ResponseEntity<ListingResponse> createListing(
+    public ResponseEntity<ListingResponse> createRoomAvailableListing(
             @AuthenticationPrincipal UserDetailsImpl userDetails,
             @Valid @RequestBody ListingCreateRequest request
     ) {
-        ListingResponse response = listingService.createListing(userDetails.getUser().getId(), request);
+        ListingResponse response = listingService.createRoomAvailableListing(userDetails.getUser().getId(), request);
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    }
+
+    @PostMapping("/roommate-wanted")
+    @Operation(
+            summary = "Create ROOMMATE_WANTED listing",
+            description = "Creates a roommate-wanted listing for users looking for a room or roommate."
+    )
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "201",
+                    description = "Listing created successfully",
+                    content = @Content(schema = @Schema(implementation = ListingResponse.class))
+            ),
+            @ApiResponse(
+                    responseCode = "400",
+                    description = "Invalid input data",
+                    content = @Content
+            ),
+            @ApiResponse(
+                    responseCode = "401",
+                    description = "User not authenticated",
+                    content = @Content
+            )
+    })
+    public ResponseEntity<ListingResponse> createRoommateWantedListing(
+            @AuthenticationPrincipal UserDetailsImpl userDetails,
+            @Valid @RequestBody RoommateWantedCreateRequest request
+    ) {
+        ListingResponse response = listingService.createRoommateWantedListing(userDetails.getUser().getId(), request);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
@@ -94,7 +126,7 @@ public class ListingController {
     @GetMapping
     @Operation(
             summary = "Get all listings",
-            description = "Retrieves a paginated list of active listings. Optionally filter by city."
+            description = "Retrieves a paginated list of active listings. Optionally filter by city and type (ALL, ROOM_AVAILABLE, ROOMMATE_WANTED)."
     )
     @ApiResponses(value = {
             @ApiResponse(
@@ -106,9 +138,11 @@ public class ListingController {
     public ResponseEntity<Page<ListingResponse>> getAllListings(
             @Parameter(description = "Filter by city (optional)")
             @RequestParam(required = false) String city,
+                        @Parameter(description = "Filter by type (optional). Allowed: ALL, ROOM_AVAILABLE, ROOMMATE_WANTED. Default: ALL")
+                        @RequestParam(defaultValue = "ALL") String type,
             @PageableDefault(size = 20, sort = "createdAt") Pageable pageable
     ) {
-        Page<ListingResponse> response = listingService.getAllListings(city, pageable);
+                Page<ListingResponse> response = listingService.getAllListings(city, type, pageable);
         return ResponseEntity.ok(response);
     }
 
@@ -151,6 +185,48 @@ public class ListingController {
             @Valid @RequestBody ListingUpdateRequest request
     ) {
         ListingResponse response = listingService.updateListing(userDetails.getUser().getId(), id, request);
+        return ResponseEntity.ok(response);
+    }
+
+    @PutMapping("/{id}/roommate-wanted")
+    @Operation(
+            summary = "Update ROOMMATE_WANTED listing",
+            description = "Updates only roommate-wanted fields (title, description, city, currency, availableFrom, petsAllowed, smokingAllowed)."
+    )
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Listing updated successfully",
+                    content = @Content(schema = @Schema(implementation = ListingResponse.class))
+            ),
+            @ApiResponse(
+                    responseCode = "400",
+                    description = "Invalid input data or wrong listing type",
+                    content = @Content
+            ),
+            @ApiResponse(
+                    responseCode = "401",
+                    description = "User not authenticated",
+                    content = @Content
+            ),
+            @ApiResponse(
+                    responseCode = "403",
+                    description = "User not authorized to update this listing",
+                    content = @Content
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "Listing not found",
+                    content = @Content
+            )
+    })
+    public ResponseEntity<ListingResponse> updateRoommateWantedListing(
+            @AuthenticationPrincipal UserDetailsImpl userDetails,
+            @Parameter(description = "Listing ID", required = true)
+            @PathVariable UUID id,
+            @Valid @RequestBody RoommateWantedUpdateRequest request
+    ) {
+        ListingResponse response = listingService.updateRoommateWantedListing(userDetails.getUser().getId(), id, request);
         return ResponseEntity.ok(response);
     }
 

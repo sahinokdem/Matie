@@ -2,6 +2,7 @@ package com.sahinokdem.housemate.repository;
 
 import com.sahinokdem.housemate.domain.listing.Listing;
 import com.sahinokdem.housemate.domain.listing.ListingStatus;
+import com.sahinokdem.housemate.domain.listing.ListingType;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -29,6 +30,16 @@ public interface ListingRepository extends JpaRepository<Listing, UUID> {
      * Find all active listings with pagination (no city filter).
      */
     Page<Listing> findAllByStatusAndDeletedAtIsNull(ListingStatus status, Pageable pageable);
+
+    /**
+     * Find all active listings by type with pagination.
+     */
+    Page<Listing> findAllByListingTypeAndStatusAndDeletedAtIsNull(ListingType type, ListingStatus status, Pageable pageable);
+
+    /**
+     * Find all active listings by city and type with pagination.
+     */
+    Page<Listing> findAllByCityAndListingTypeAndStatusAndDeletedAtIsNull(String city, ListingType type, ListingStatus status, Pageable pageable);
 
     /**
      * Find listing by ID with owner and photos eagerly loaded (avoid N+1).
