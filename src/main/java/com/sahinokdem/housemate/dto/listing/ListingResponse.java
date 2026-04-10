@@ -1,5 +1,6 @@
 package com.sahinokdem.housemate.dto.listing;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.sahinokdem.housemate.domain.listing.ListingStatus;
 import com.sahinokdem.housemate.domain.listing.ListingType;
 import lombok.AllArgsConstructor;
@@ -17,6 +18,7 @@ import java.util.UUID;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class ListingResponse {
 
     private UUID id;

@@ -40,29 +40,29 @@ public class Listing extends BaseEntity {
     @Column(name = "description", nullable = false, columnDefinition = "TEXT")
     private String description;
 
-    @Column(name = "city", nullable = false, length = 100)
+    @Column(name = "city", nullable = true, length = 100)
     private String city;
 
-    @Column(name = "address", nullable = false, length = 255)
+    @Column(name = "address", nullable = true, length = 255)
     private String address;
 
-    @Column(name = "postal_code", length = 20)
+    @Column(name = "postal_code", length = 20, nullable = true)
     private String postalCode;
 
-    @Column(name = "latitude", precision = 10, scale = 8)
+    @Column(name = "latitude", precision = 10, scale = 8, nullable = true)
     private BigDecimal latitude;
 
-    @Column(name = "longitude", precision = 11, scale = 8)
+    @Column(name = "longitude", precision = 11, scale = 8, nullable = true)
     private BigDecimal longitude;
 
-    @Column(name = "rent_amount", nullable = false, precision = 10, scale = 2)
+    @Column(name = "rent_amount", nullable = true, precision = 10, scale = 2)
     private BigDecimal rentAmount;
 
-    @Column(name = "currency", nullable = false, length = 3)
+    @Column(name = "currency", nullable = true, length = 3)
     @Builder.Default
     private String currency = "USD";
 
-    @Column(name = "available_from", nullable = false)
+    @Column(name = "available_from", nullable = true)
     private LocalDate availableFrom;
 
     @Column(name = "lease_duration_months")
@@ -71,19 +71,19 @@ public class Listing extends BaseEntity {
     @Column(name = "room_type", length = 50)
     private String roomType;
 
-    @Column(name = "furnished", nullable = false)
+    @Column(name = "furnished", nullable = true)
     @Builder.Default
     private Boolean furnished = false;
 
-    @Column(name = "utilities_included", nullable = false)
+    @Column(name = "utilities_included", nullable = true)
     @Builder.Default
     private Boolean utilitiesIncluded = false;
 
-    @Column(name = "pets_allowed", nullable = false)
+    @Column(name = "pets_allowed", nullable = true)
     @Builder.Default
     private Boolean petsAllowed = false;
 
-    @Column(name = "smoking_allowed", nullable = false)
+    @Column(name = "smoking_allowed", nullable = true)
     @Builder.Default
     private Boolean smokingAllowed = false;
 

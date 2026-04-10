@@ -1,6 +1,5 @@
 package com.sahinokdem.housemate.dto.listing;
 
-import com.sahinokdem.housemate.domain.listing.ListingType;
 import jakarta.validation.constraints.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -16,9 +15,6 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 public class ListingCreateRequest {
-
-    @NotNull(message = "Listing type is required")
-    private ListingType listingType;
 
     @NotBlank(message = "Title is required")
     @Size(min = 10, max = 200, message = "Title must be between 10 and 200 characters")
@@ -39,6 +35,7 @@ public class ListingCreateRequest {
     @Size(max = 20, message = "Postal code must not exceed 20 characters")
     private String postalCode;
 
+    @NotNull(message = "Rent amount is required")
     @DecimalMin(value = "0.0", inclusive = false, message = "Rent amount must be positive")
     @Digits(integer = 8, fraction = 2, message = "Invalid rent amount format")
     private BigDecimal rentAmount;
