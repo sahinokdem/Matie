@@ -361,7 +361,7 @@ public class ListingStepDefinitions {
         lastResult = mockMvc.perform(delete(path)).andReturn();
     }
 
-    @When("I GET {string}")
+    @When("I GET listing {string}")
     public void iGet(String path) throws Exception {
         if ("/api/v1/listings/{id}".equals(path)) {
             path = "/api/v1/listings/" + listingId;
@@ -370,7 +370,7 @@ public class ListingStepDefinitions {
         lastResult = mockMvc.perform(get(path)).andReturn();
     }
 
-    @Then("the response status should be {int}")
+    @Then("the listing response status should be {int}")
     public void theResponseStatusShouldBe(int expectedStatus) {
         org.junit.jupiter.api.Assertions.assertEquals(expectedStatus, lastResult.getResponse().getStatus());
     }
