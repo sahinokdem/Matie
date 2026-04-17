@@ -9,6 +9,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @Repository
@@ -24,4 +25,7 @@ public interface ApplicationRepository extends JpaRepository<Application, UUID> 
 
     @EntityGraph(attributePaths = {"listing", "listing.owner", "applicant"})
     Page<Application> findAllByApplicantIdAndStatus(UUID applicantId, ApplicationStatus status, Pageable pageable);
+
+    @EntityGraph(attributePaths = {"listing", "listing.owner", "applicant"})
+    Optional<Application> findByListingIdAndApplicantIdAndStatus(UUID listingId, UUID applicantId, ApplicationStatus status);
 }

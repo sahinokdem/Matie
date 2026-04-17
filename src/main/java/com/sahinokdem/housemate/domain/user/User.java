@@ -1,6 +1,7 @@
 package com.sahinokdem.housemate.domain.user;
 
 import com.sahinokdem.housemate.domain.BaseEntity;
+import com.sahinokdem.housemate.domain.university.University;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -18,6 +19,10 @@ import org.hibernate.type.SqlTypes;
 @AllArgsConstructor
 @Builder
 public class User extends BaseEntity {
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "university_id", nullable = false)
+    private University university;
 
     @Column(name = "email", nullable = false, unique = true, length = 255)
     private String email;

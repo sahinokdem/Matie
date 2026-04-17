@@ -21,5 +21,6 @@ public class UserProfileResponse {
     private String phone;
     private String bio;
     private String avatarUrl;
+    private UserUniversityResponse university;
     private Instant createdAt;
 }

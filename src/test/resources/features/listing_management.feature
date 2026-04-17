@@ -114,8 +114,9 @@ Feature: Listing management critical scenarios
     Then the response status should be 200
     And the response content size should be 2
 
-  Scenario: City filter returns only Izmir listings
-    Given listing service has listings in Izmir and Istanbul
-    When I GET "/api/v1/listings?city=Izmir"
+  Scenario: University scope isolation
+    Given I am authenticated as listing owner
+    And listing service returns only listings from same university
+    When I GET "/api/v1/listings"
     Then the response status should be 200
-    And the response content size should be 2
+    And the response content size should be 1

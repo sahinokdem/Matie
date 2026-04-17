@@ -123,7 +123,6 @@ public class ListingStepDefinitions {
         listingCreateRequest = ListingCreateRequest.builder()
                 .title("Spacious room in city center")
                 .description("Very clean room, close to metro, internet included and suitable for students.")
-                .city("Istanbul")
                 .address("Kadikoy, Moda Street 10")
                 .postalCode("34710")
                 .rentAmount(new BigDecimal("15000"))
@@ -162,7 +161,6 @@ public class ListingStepDefinitions {
         roommateWantedCreateRequest = RoommateWantedCreateRequest.builder()
                 .title("Looking for roommate in central area")
                 .description("I am looking for a clean and respectful roommate near public transport.")
-                .city("Izmir")
                 .currency("TRY")
                 .rentAmount(new BigDecimal("12000"))
                 .availableFrom(LocalDate.now().plusDays(7))
@@ -184,7 +182,7 @@ public class ListingStepDefinitions {
                 buildListingResponse(ListingType.ROOMMATE_WANTED, false)
         );
 
-        when(listingService.getAllListings(eq(null), eq("ROOMMATE_WANTED"), any(Pageable.class)))
+        when(listingService.getAllListings(eq(ownerId), eq("ROOMMATE_WANTED"), any(Pageable.class)))
                 .thenReturn(new PageImpl<>(content, PageRequest.of(0, 20), content.size()));
     }
 
@@ -281,8 +279,30 @@ public class ListingStepDefinitions {
             content.add(buildListingResponse(ListingType.ROOM_AVAILABLE, true));
         }
 
-        when(listingService.getAllListings(eq(null), eq(null), any(Pageable.class)))
+        when(listingService.getAllListings(eq(ownerId), eq(null), any(Pageable.class)))
                 .thenReturn(new PageImpl<>(content, PageRequest.of(0, 10), 25));
+    }
+
+    @And("listing service returns only listings from same university")
+    public void listingServiceReturnsOnlyListingsFromSameUniversity() {
+        // Build one listing that matches current user's university and one from another university
+        ListingResponse sameUni = buildListingResponse(ListingType.ROOM_AVAILABLE, true);
+        ListingResponse otherUni = buildListingResponse(ListingType.ROOM_AVAILABLE, true);
+
+        // set distinct university ids for clarity
+        sameUni.getOwner().setUniversityId(UUID.fromString("55555555-5555-5555-5555-555555555555"));
+        sameUni.getOwner().setUniversityName("İzmir Yüksek Teknoloji Enstitüsü");
+        sameUni.getOwner().setUniversityShortName("IYTE");
+
+        otherUni.getOwner().setUniversityId(UUID.fromString("66666666-6666-6666-6666-666666666666"));
+        otherUni.getOwner().setUniversityName("Other University");
+        otherUni.getOwner().setUniversityShortName("OTH");
+
+        // Only return the listing that belongs to the same university
+        List<ListingResponse> content = List.of(sameUni);
+
+        when(listingService.getAllListings(eq(ownerId), eq(null), any(Pageable.class)))
+                .thenReturn(new PageImpl<>(content, PageRequest.of(0, 20), content.size()));
     }
 
     @And("listing service excludes soft-deleted listings from default query")
@@ -292,18 +312,7 @@ public class ListingStepDefinitions {
                 buildListingResponse(ListingType.ROOMMATE_WANTED, false)
         );
 
-        when(listingService.getAllListings(eq(null), eq(null), any(Pageable.class)))
-                .thenReturn(new PageImpl<>(content, PageRequest.of(0, 20), 2));
-    }
-
-    @And("listing service has listings in Izmir and Istanbul")
-    public void listingServiceHasListingsInIzmirAndIstanbul() {
-        List<ListingResponse> content = List.of(
-                buildListingResponseWithCity("Izmir", ListingType.ROOMMATE_WANTED),
-                buildListingResponseWithCity("Izmir", ListingType.ROOM_AVAILABLE)
-        );
-
-        when(listingService.getAllListings(eq("Izmir"), eq(null), any(Pageable.class)))
+        when(listingService.getAllListings(eq(ownerId), eq(null), any(Pageable.class)))
                 .thenReturn(new PageImpl<>(content, PageRequest.of(0, 20), 2));
     }
 
@@ -428,7 +437,6 @@ public class ListingStepDefinitions {
                 .listingType(type)
                 .title("Sample listing")
                 .description("Sample listing description with sufficient length for tests")
-                .city("Istanbul")
                 .currency("TRY")
                 .availableFrom(LocalDate.now().plusDays(15))
                 .petsAllowed(true)
@@ -440,6 +448,9 @@ public class ListingStepDefinitions {
                         .id(ownerId)
                         .firstName("Owner")
                         .avatarUrl("https://cdn.example.com/avatar.jpg")
+                    .universityId(UUID.fromString("55555555-5555-5555-5555-555555555555"))
+                    .universityName("İzmir Yüksek Teknoloji Enstitüsü")
+                    .universityShortName("IYTE")
                         .build());
 
         if (includeRoomFields) {
@@ -456,12 +467,6 @@ public class ListingStepDefinitions {
         }
 
         return builder.build();
-    }
-
-    private ListingResponse buildListingResponseWithCity(String city, ListingType type) {
-        ListingResponse response = buildListingResponse(type, type == ListingType.ROOM_AVAILABLE);
-        response.setCity(city);
-        return response;
     }
 
     private User buildUser(UUID userId, String firstName) {

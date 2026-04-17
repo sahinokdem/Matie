@@ -25,7 +25,6 @@ public class ListingResponse {
     private ListingType listingType;
     private String title;
     private String description;
-    private String city;
     private String address;
     private String postalCode;
     private BigDecimal rentAmount;

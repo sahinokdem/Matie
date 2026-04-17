@@ -24,10 +24,6 @@ public class ListingCreateRequest {
     @Size(min = 50, max = 2000, message = "Description must be between 50 and 2000 characters")
     private String description;
 
-    @NotBlank(message = "City is required")
-    @Size(max = 100, message = "City must not exceed 100 characters")
-    private String city;
-
     @NotBlank(message = "Address is required")
     @Size(max = 255, message = "Address must not exceed 255 characters")
     private String address;

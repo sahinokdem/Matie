@@ -31,6 +31,7 @@ public class ApplicationService {
     private final ApplicationRepository applicationRepository;
     private final UserRepository userRepository;
     private final ListingRepository listingRepository;
+    private final ConversationService conversationService;
 
     @Transactional
     public ApplicationResponse createApplication(UUID currentUserId, ApplicationCreateRequest request) {
@@ -85,7 +86,20 @@ public class ApplicationService {
 
         application.setStatus(newStatus);
         Application updatedApplication = applicationRepository.save(application);
+
+        if (newStatus == ApplicationStatus.ACCEPTED) {
+            createConversationForAcceptedApplication(updatedApplication);
+        }
+
         return mapToResponse(updatedApplication);
+    }
+
+    private void createConversationForAcceptedApplication(Application application) {
+        conversationService.createConversation(
+                application.getListing().getOwner(),
+                application.getApplicant(),
+                application.getListing()
+        );
     }
 
     @Transactional(readOnly = true)

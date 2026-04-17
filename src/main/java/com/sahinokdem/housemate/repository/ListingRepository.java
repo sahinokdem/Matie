@@ -22,24 +22,14 @@ public interface ListingRepository extends JpaRepository<Listing, UUID> {
     Optional<Listing> findByIdAndStatusAndDeletedAtIsNull(UUID id, ListingStatus status);
 
     /**
-     * Find all active listings by city with pagination.
-     */
-    Page<Listing> findAllByCityAndStatusAndDeletedAtIsNull(String city, ListingStatus status, Pageable pageable);
-
-    /**
      * Find all active listings with pagination (no city filter).
      */
-    Page<Listing> findAllByStatusAndDeletedAtIsNull(ListingStatus status, Pageable pageable);
+    Page<Listing> findAllByOwnerUniversityIdAndStatusAndDeletedAtIsNull(UUID universityId, ListingStatus status, Pageable pageable);
 
     /**
      * Find all active listings by type with pagination.
      */
-    Page<Listing> findAllByListingTypeAndStatusAndDeletedAtIsNull(ListingType type, ListingStatus status, Pageable pageable);
-
-    /**
-     * Find all active listings by city and type with pagination.
-     */
-    Page<Listing> findAllByCityAndListingTypeAndStatusAndDeletedAtIsNull(String city, ListingType type, ListingStatus status, Pageable pageable);
+    Page<Listing> findAllByOwnerUniversityIdAndListingTypeAndStatusAndDeletedAtIsNull(UUID universityId, ListingType type, ListingStatus status, Pageable pageable);
 
     /**
      * Find listing by ID with owner and photos eagerly loaded (avoid N+1).

@@ -126,7 +126,7 @@ public class ListingController {
     @GetMapping
     @Operation(
             summary = "Get all listings",
-            description = "Retrieves a paginated list of active listings. Optionally filter by city and type (ALL, ROOM_AVAILABLE, ROOMMATE_WANTED)."
+            description = "Retrieves a paginated list of active listings for the current user's university. Optionally filter by type (ALL, ROOM_AVAILABLE, ROOMMATE_WANTED)."
     )
     @ApiResponses(value = {
             @ApiResponse(
@@ -136,14 +136,13 @@ public class ListingController {
             )
     })
     public ResponseEntity<Page<ListingResponse>> getAllListings(
-            @Parameter(description = "Filter by city (optional)")
-            @RequestParam(required = false) String city,
+            @AuthenticationPrincipal UserDetailsImpl userDetails,
                         @Parameter(description = "Filter by type (optional). Allowed: ALL, ROOM_AVAILABLE, ROOMMATE_WANTED. Default: ALL")
                         @RequestParam(defaultValue = "ALL") String type,
             @PageableDefault(size = 20, sort = "createdAt") Pageable pageable
     ) {
                 String normalizedType = "ALL".equalsIgnoreCase(type) ? null : type;
-                Page<ListingResponse> response = listingService.getAllListings(city, normalizedType, pageable);
+                Page<ListingResponse> response = listingService.getAllListings(userDetails.getUser().getId(), normalizedType, pageable);
         return ResponseEntity.ok(response);
     }
 
@@ -192,7 +191,7 @@ public class ListingController {
     @PutMapping("/{id}/roommate-wanted")
     @Operation(
             summary = "Update ROOMMATE_WANTED listing",
-            description = "Updates only roommate-wanted fields (title, description, city, currency, availableFrom, petsAllowed, smokingAllowed)."
+            description = "Updates only roommate-wanted fields (title, description, currency, availableFrom, petsAllowed, smokingAllowed)."
     )
     @ApiResponses(value = {
             @ApiResponse(

@@ -43,7 +43,6 @@ public class ListingService {
             .listingType(ListingType.ROOM_AVAILABLE)
                 .title(request.getTitle())
                 .description(request.getDescription())
-                .city(request.getCity())
                 .address(request.getAddress())
                 .postalCode(request.getPostalCode())
                 .rentAmount(request.getRentAmount())
@@ -86,7 +85,6 @@ public class ListingService {
                 .listingType(ListingType.ROOMMATE_WANTED)
                 .title(request.getTitle())
                 .description(request.getDescription())
-                .city(request.getCity())
             .currency(normalizeCurrency(request.getCurrency()))
             .rentAmount(request.getRentAmount())
                 .availableFrom(request.getAvailableFrom())
@@ -111,28 +109,22 @@ public class ListingService {
     }
 
     @Transactional(readOnly = true)
-    public Page<ListingResponse> getAllListings(String city, String typeFilter, Pageable pageable) {
+    public Page<ListingResponse> getAllListings(UUID currentUserId, String typeFilter, Pageable pageable) {
+        User currentUser = userRepository.findById(currentUserId)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + currentUserId));
+
+        UUID universityId = currentUser.getUniversity().getId();
         Page<Listing> listings;
         ListingType listingType = parseListingTypeFilter(typeFilter);
-
-        boolean hasCity = city != null && !city.isBlank();
         boolean hasType = listingType != null;
 
-        if (hasCity && hasType) {
-            listings = listingRepository.findAllByCityAndListingTypeAndStatusAndDeletedAtIsNull(
-                    city, listingType, ListingStatus.ACTIVE, pageable
-            );
-        } else if (hasCity) {
-            listings = listingRepository.findAllByCityAndStatusAndDeletedAtIsNull(
-                    city, ListingStatus.ACTIVE, pageable
-            );
-        } else if (hasType) {
-            listings = listingRepository.findAllByListingTypeAndStatusAndDeletedAtIsNull(
-                    listingType, ListingStatus.ACTIVE, pageable
+        if (hasType) {
+            listings = listingRepository.findAllByOwnerUniversityIdAndListingTypeAndStatusAndDeletedAtIsNull(
+                universityId, listingType, ListingStatus.ACTIVE, pageable
             );
         } else {
-            listings = listingRepository.findAllByStatusAndDeletedAtIsNull(
-                    ListingStatus.ACTIVE, pageable
+            listings = listingRepository.findAllByOwnerUniversityIdAndStatusAndDeletedAtIsNull(
+                universityId, ListingStatus.ACTIVE, pageable
             );
         }
 
@@ -201,9 +193,6 @@ public class ListingService {
         }
         if (request.getDescription() != null) {
             listing.setDescription(request.getDescription());
-        }
-        if (request.getCity() != null) {
-            listing.setCity(request.getCity());
         }
         if (request.getCurrency() != null) {
             listing.setCurrency(normalizeCurrency(request.getCurrency()));
@@ -298,6 +287,9 @@ public class ListingService {
                 .firstName(listing.getOwner().getFirstName())
                 .lastName(listing.getOwner().getLastName())
                 .avatarUrl(listing.getOwner().getAvatarUrl())
+            .universityId(listing.getOwner().getUniversity().getId())
+            .universityName(listing.getOwner().getUniversity().getName())
+            .universityShortName(listing.getOwner().getUniversity().getShortName())
                 .build();
 
         List<ListingPhotoResponse> photoResponses = listing.getPhotos().stream()
@@ -310,7 +302,6 @@ public class ListingService {
                 .listingType(listing.getListingType())
                 .title(listing.getTitle())
                 .description(listing.getDescription())
-                .city(listing.getCity())
                 .address(listing.getAddress())
                 .postalCode(listing.getPostalCode())
                 .rentAmount(listing.getRentAmount())

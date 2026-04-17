@@ -40,9 +40,6 @@ public class Listing extends BaseEntity {
     @Column(name = "description", nullable = false, columnDefinition = "TEXT")
     private String description;
 
-    @Column(name = "city", nullable = true, length = 100)
-    private String city;
-
     @Column(name = "address", nullable = true, length = 255)
     private String address;
 
