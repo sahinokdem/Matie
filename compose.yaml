@@ -30,12 +30,14 @@ services:
       - postgres
     networks:
       - housemate-net
-      
+
   watchtower:
     image: containrrr/watchtower
     container_name: watchtower
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
+    environment:
+      - DOCKER_API_VERSION=1.44
     command: --interval 30 --cleanup # 30 sn ara, eski imajları siler
 
 volumes:
