@@ -17,7 +17,7 @@ spring:
 
 # JWT Configuration
 jwt:
-  secret-key: ${JWT_SECRET_KEY:404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970}
+  secret-key: ${JWT_SECRET_KEY}
   expiration: 86400000 # 24 hours in milliseconds
 
 # OpenAPI / Swagger Configuration
