@@ -17,6 +17,7 @@ services:
 
   housemate-be:
     build: .
+    image: ghcr.io/sahinokdem/matie:latest
     container_name: housemate-backend
     ports:
       - "8080:8080"
@@ -29,6 +30,13 @@ services:
       - postgres
     networks:
       - housemate-net
+      
+  watchtower:
+    image: containrrr/watchtower
+    container_name: watchtower
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    command: --interval 30 --cleanup # 30 sn ara, eski imajları siler
 
 volumes:
   pgdata:
