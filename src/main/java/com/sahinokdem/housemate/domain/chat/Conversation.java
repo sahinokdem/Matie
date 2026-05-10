@@ -2,7 +2,6 @@ package com.sahinokdem.housemate.domain.chat;
 
 import com.sahinokdem.housemate.domain.BaseEntity;
 import com.sahinokdem.housemate.domain.application.Application;
-import com.sahinokdem.housemate.domain.listing.ListingPhoto;
 
 import jakarta.persistence.*;
 import lombok.*;
@@ -13,7 +12,7 @@ import java.util.List;
 
 @Entity
 @Table(name = "conversations")
-@Getter(AccessLevel.NONE)
+@Getter
 @Setter()
 @NoArgsConstructor
 @AllArgsConstructor
@@ -42,8 +41,7 @@ public class Conversation extends BaseEntity {
         message.setConversation(null);
     }
 
-    // Listeyi sadece okunabilir (değiştirilemez) olarak dışarı açıyoruz
-    public List<ListingPhoto> getPhotos() {
-        return Collections.unmodifiableList(getPhotos());
+    public List<Message> getMessages() {
+        return Collections.unmodifiableList(this.messages);
     }
 }

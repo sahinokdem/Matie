@@ -1,5 +1,6 @@
 package com.sahinokdem.housemate.service;
 
+import com.sahinokdem.housemate.domain.university.University;
 import com.sahinokdem.housemate.domain.user.User;
 import com.sahinokdem.housemate.domain.user.UserRole;
 import com.sahinokdem.housemate.domain.user.UserStatus;
@@ -7,6 +8,8 @@ import com.sahinokdem.housemate.dto.auth.AuthResponse;
 import com.sahinokdem.housemate.dto.auth.LoginRequest;
 import com.sahinokdem.housemate.dto.auth.RegisterRequest;
 import com.sahinokdem.housemate.exception.EmailAlreadyExistsException;
+import com.sahinokdem.housemate.exception.ResourceNotFoundException;
+import com.sahinokdem.housemate.repository.UniversityRepository;
 import com.sahinokdem.housemate.repository.UserRepository;
 import com.sahinokdem.housemate.security.JwtService;
 import com.sahinokdem.housemate.security.UserDetailsImpl;
@@ -23,6 +26,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class AuthService {
 
     private final UserRepository userRepository;
+    private final UniversityRepository universityRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
     private final AuthenticationManager authenticationManager;
@@ -34,8 +38,13 @@ public class AuthService {
             throw new EmailAlreadyExistsException("Email is already registered: " + request.getEmail());
         }
 
+        University university = universityRepository.findById(request.getUniversityId())
+            .filter(University::getActive)
+            .orElseThrow(() -> new ResourceNotFoundException("University not found with id: " + request.getUniversityId()));
+
         // Create new user
         User user = User.builder()
+            .university(university)
                 .firstName(request.getFirstName())
                 .lastName(request.getLastName())
                 .email(request.getEmail())

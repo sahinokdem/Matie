@@ -5,6 +5,7 @@ import com.sahinokdem.housemate.domain.user.UserStatus;
 import com.sahinokdem.housemate.dto.user.UserDeleteRequest;
 import com.sahinokdem.housemate.dto.user.UserProfileResponse;
 import com.sahinokdem.housemate.dto.user.UserProfileUpdateRequest;
+import com.sahinokdem.housemate.dto.user.UserUniversityResponse;
 import com.sahinokdem.housemate.exception.ResourceNotFoundException;
 import com.sahinokdem.housemate.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -77,6 +78,12 @@ public class UserService {
                 .phone(user.getPhone())
                 .bio(user.getBio())
                 .avatarUrl(user.getAvatarUrl())
+            .university(UserUniversityResponse.builder()
+                .id(user.getUniversity().getId())
+                .name(user.getUniversity().getName())
+                .shortName(user.getUniversity().getShortName())
+                .domain(user.getUniversity().getDomain())
+                .build())
                 .createdAt(user.getCreatedAt())
                 .build();
     }

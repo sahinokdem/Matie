@@ -17,4 +17,7 @@ public class ListingOwnerResponse {
     private String firstName;
     private String lastName;
     private String avatarUrl;
+    private UUID universityId;
+    private String universityName;
+    private String universityShortName;
 }

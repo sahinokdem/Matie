@@ -17,6 +17,7 @@ import com.sahinokdem.housemate.repository.ApplicationRepository;
 import com.sahinokdem.housemate.repository.ListingRepository;
 import com.sahinokdem.housemate.repository.UserRepository;
 import com.sahinokdem.housemate.service.ApplicationService;
+import com.sahinokdem.housemate.service.ConversationService;
 import io.cucumber.java.Before;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
@@ -40,6 +41,7 @@ public class ApplicationServiceStepDefinitions {
     private ApplicationRepository applicationRepository;
     private UserRepository userRepository;
     private ListingRepository listingRepository;
+    private ConversationService conversationService;
     private ApplicationService applicationService;
 
     private UUID currentUserId;
@@ -62,7 +64,8 @@ public class ApplicationServiceStepDefinitions {
         applicationRepository = mock(ApplicationRepository.class);
         userRepository = mock(UserRepository.class);
         listingRepository = mock(ListingRepository.class);
-        applicationService = new ApplicationService(applicationRepository, userRepository, listingRepository);
+        conversationService = mock(ConversationService.class);
+        applicationService = new ApplicationService(applicationRepository, userRepository, listingRepository, conversationService);
 
         currentUserId = UUID.randomUUID();
         ownerId = UUID.randomUUID();
@@ -247,7 +250,6 @@ public class ApplicationServiceStepDefinitions {
                 .listingType(ListingType.ROOM_AVAILABLE)
                 .title("Nice room in city center")
                 .description("A great room with all amenities and close to transportation.")
-                .city("Istanbul")
                 .status(ListingStatus.ACTIVE)
                 .build();
         createdListing.setId(id);
