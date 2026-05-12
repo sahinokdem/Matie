@@ -14,13 +14,12 @@ services:
       - pgdata:/var/lib/postgresql/data
     networks:
       - housemate-net
+    restart: unless-stopped
 
   housemate-be:
     build: .
     image: ghcr.io/sahinokdem/matie:latest
     container_name: housemate-backend
-    ports:
-      - "8080:8080"
     environment:
       - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/${POSTGRES_DB}
       - SPRING_DATASOURCE_USERNAME=${POSTGRES_USER}
@@ -30,6 +29,30 @@ services:
       - postgres
     networks:
       - housemate-net
+    restart: unless-stopped
+
+  nginx:
+    image: nginx:1.27-alpine
+    container_name: housemate-nginx
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
+      # FE Dockerize edilene kadar aşağıdaki satırı kapalı tutabilirsin 
+      # veya sunucuda 'frontend/dist' klasörünü manuel oluşturmalısın.
+      # - ./frontend/dist:/usr/share/nginx/html:ro
+      - nginx_cache:/var/cache/nginx
+    depends_on:
+      - housemate-be
+    networks:
+      - housemate-net
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
 
   watchtower:
     image: containrrr/watchtower
@@ -39,10 +62,11 @@ services:
       - /root/.docker/config.json:/config.json
     environment:
       - DOCKER_API_VERSION=1.44
-    command: --interval 30 --cleanup # 30 sn ara, eski imajları siler
+    command: --interval 30 --cleanup
 
 volumes:
   pgdata:
+  nginx_cache:
 
 networks:
   housemate-net:
