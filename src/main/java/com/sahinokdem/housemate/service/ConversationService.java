@@ -49,7 +49,23 @@ public class ConversationService {
         Conversation conversation = Conversation.builder()
                 .application(acceptedApplication)
                 .build();
-        return conversationRepository.save(conversation);
+        
+        // 1. Önce sohbet odasını kaydediyoruz
+        Conversation savedConversation = conversationRepository.save(conversation);
+
+        // 2. EKSİK OLAN MANTIK: Başvurudaki mesajı alıp ilk mesaj olarak odaya fırlatıyoruz!
+        if (acceptedApplication.getMessage() != null && !acceptedApplication.getMessage().isBlank()) {
+            Message initialMessage = Message.builder()
+                    .conversation(savedConversation)
+                    .sender(applicant) // Mesajı başvuran (Veli) atıyor
+                    .content(acceptedApplication.getMessage())
+                    .status(com.sahinokdem.housemate.domain.chat.MessageStatus.SENT) 
+                    .sentAt(java.time.Instant.now())
+                    .build();
+            messageRepository.save(initialMessage); // Mesajı veritabanına yaz
+        }
+
+        return savedConversation;
     }
 
     @Transactional(readOnly = true)
